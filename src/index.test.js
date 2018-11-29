@@ -5,7 +5,7 @@ describe('middleware', () => {
   const FAKE_ACTION = 'FAKE_ACTION';
   const LOAD_START = 'LOAD_START';
   const LOAD_END = 'LOAD_END';
-  const FAKE_ERROR = 'FAKE_ERROR';
+  const ERROR = 'ERROR';
 
   describe('payload isnt a promise', () => {
     const reducer = jest.fn();
@@ -49,13 +49,13 @@ describe('middleware', () => {
       store.dispatch(action)
       return promise
         .then(() => {
-          expect(reducer.mock.calls[3][1]).toEqual(action);
+          expect(reducer.mock.calls[3][1]).toEqual({ type: FAKE_ACTION, payload: 'made it!' });
         });
     });
 
     it('successfully errors', () => {
       const error = Promise.reject('This is an Error, Stupidhead!');
-      const action = { type: FAKE_ERROR, payload: error };
+      const action = { type: ERROR, payload: error };
       const reducer = jest.fn();
       const store = createStore(reducer, {}, applyMiddleware(middleware));
       store.dispatch(action)
@@ -64,7 +64,7 @@ describe('middleware', () => {
       .catch(() => {
         expect(reducer.mock.calls[1][1].type).toEqual(LOAD_START);
         expect(reducer.mock.calls[2][1].type).toEqual(LOAD_END);
-        expect(reducer.mock.calls[3][1]).toEqual(action);
+        expect(reducer.mock.calls[3][1]).toEqual({ type: ERROR, payload: 'This is an Error, Stupidhead!' });
       })
     })
   })
