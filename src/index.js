@@ -1,11 +1,18 @@
 export const middleware = store => next => action => {
-
+  if(!action.payload || !isPromise(action.payload)) return next(action);
   store.dispatch({ type: 'LOAD_START' });
 
-  if(!isPromise) return next(action);
-
-  return Promise.resolve(action)
-    .then(store.dispatch({ type: 'LOAD_END' }));
+  action.payload
+    .then(result => {
+      store.dispatch({ type: 'LOAD_END' });
+      action.payload = result;
+      next(action);
+    })
+    .catch(error => {
+      store.dispatch({ type: 'LOAD_END' })
+      action.payload = error;
+      next(action)
+    });
 }
 
 const isPromise = payload => {
